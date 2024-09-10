@@ -1,0 +1,13 @@
+# ninja log v6
+10	358	7476965378959227	CMakeFiles/B_Tree.dir/main.c.obj	71f21cc3ceede4af
+373	614	7476965382587937	B_Tree.exe	257e09cdab21b6d4
+20	327	7476975947355064	CMakeFiles/B_Tree.dir/main.c.obj	71f21cc3ceede4af
+328	536	7476975950508728	B_Tree.exe	257e09cdab21b6d4
+62	372	7476976969613203	CMakeFiles/B_Tree.dir/main.c.obj	71f21cc3ceede4af
+373	594	7476976972725605	B_Tree.exe	257e09cdab21b6d4
+48	392	7476977215182984	CMakeFiles/B_Tree.dir/main.c.obj	71f21cc3ceede4af
+394	633	7476977218634719	B_Tree.exe	257e09cdab21b6d4
+91	401	7477122183360922	CMakeFiles/B_Tree.dir/main.c.obj	71f21cc3ceede4af
+402	643	7477122186471550	B_Tree.exe	257e09cdab21b6d4
+69	407	7477122307424100	CMakeFiles/B_Tree.dir/main.c.obj	71f21cc3ceede4af
+408	645	7477122310813245	B_Tree.exe	257e09cdab21b6d4
