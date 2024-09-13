@@ -1,11 +1,10 @@
+// Source code: https://www.geeksforgeeks.org/implementation-of-b-plus-tree-in-c/
 // C Program to Implement B+ Tree
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MIN_DEGREE                                         \
-    3 // Minimum degree (defines the range for number of
-      // keys)
+#define MIN_DEGREE 3 // Minimum degree (defines the range for number of keys)
 
 typedef struct Node {
     // Array of keys
@@ -160,8 +159,7 @@ void insert(BTree* btree, int key)
     }
 }
 
-// Function prototypes for helper functions used in
-// deleteKey
+// Function prototypes for helper functions used in deleteKey
 void deleteKeyHelper(Node* node, int key);
 int findKey(Node* node, int key);
 void removeFromLeaf(Node* node, int idx);
@@ -187,8 +185,7 @@ void deleteKey(BTree* btree, int key)
     }
 }
 
-// Helper function to recursively delete a key from the B+
-// tree
+// Helper function to recursively delete a key from the B+ tree
 void deleteKeyHelper(Node* node, int key)
 {
     int idx = findKey(
@@ -424,54 +421,91 @@ void merge(Node* node, int idx)
     free(sibling);
 }
 
+
+// Function to visualize the B+ tree structure
+void printTree(Node* node, int level) {
+    if (node == NULL) {
+        return;
+    }
+
+    // Print indentation based on the level
+    for (int i = 0; i < level; i++) {
+        printf("  ");
+    }
+
+    // Print the node's keys
+    printf("[");
+    for (int i = 0; i < node->n; i++) {
+        printf("%d ", node->keys[i]);
+    }
+    printf("]\n");
+
+    // Recursively visualize children
+    if (!node->leaf) {
+        for (int i = 0; i <= node->n; i++) {
+            printTree(node->children[i], level + 1);
+        }
+    }
+}
+
 int main()
 {
     BTree* btree = createBTree(MIN_DEGREE);
 
-    // Insert elements into the B+ tree
-    insert(btree, 2);
-    insert(btree, 4);
-    insert(btree, 7);
-    insert(btree, 10);
-    insert(btree, 17);
-    insert(btree, 21);
-    insert(btree, 28);
+    int option = 0;
+    int key = 0;
+    bool found = false;
 
-    // Print the B+ tree
-    printf("B+ Tree after insertion: ");
-    display(btree->root);
-    printf("\n");
+    while (option != 5)
+    {
+        printf("\n\nMenu\n");
+        printf("1 - Insert\n");
+        printf("2 - Search\n");
+        printf("3 - Remove\n");
+        printf("4 - Display\n");
+        printf("5 - Exit\n");
 
-    // Search for a key
-    int key_to_search = 17;
-    bool found = search(btree->root, key_to_search);
+        printf("Enter the desired option:");
+        scanf("%d", &option);
 
-    if (found) {
-        printf("Key %d found in the B+ tree.\n",
-               key_to_search);
-    }
-    else {
-        printf("Key %d not found in the B+ tree.\n",
-               key_to_search);
-    }
+        switch (option)
+        {
+            case 1:
+                printf("Enter the key to be inserted:");
+                scanf("%d", &key);
+                insert(btree, key);
+                break;
 
-    // Delete element from the B+ tree
-    deleteKey(btree, 17);
+            case 2:
+                printf("Enter the key to be searched:");
+                scanf("%d", &key);
+                found = search(btree->root, key);
 
-    // Print the B+ tree after deletion
-    printf("B+ Tree after deletion: ");
-    display(btree->root);
-    printf("\n");
+                if (found) {
+                    printf("Key %d found in the B+ tree.\n", key);
+                }
+                else {
+                    printf("Key %d not found in the B+ tree.\n", key);
+                }
+                break;
 
-    found = search(btree->root, key_to_search);
+            case 3:
+                printf("Enter the key to be removed:");
+                scanf("%d", &key);
+                deleteKey(btree, key);
+                break;
 
-    if (found) {
-        printf("Key %d found in the B+ tree.\n",
-               key_to_search);
-    }
-    else {
-        printf("Key %d not found in the B+ tree.\n",
-               key_to_search);
+            case 4:
+                printTree(btree->root, 0);
+                break;
+
+            case 5:
+                break;
+
+            default:
+                printf("Invalid option!\n");
+                break;
+        }
     }
 
     return 0;
