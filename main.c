@@ -28,6 +28,20 @@ typedef struct BTree {
     int t;
 } BTree;
 
+/* Pseudo code for create node 
+
+CREATE-NODE(t, leaf)
+1. x = ALLOCATE-NODE()
+2. x.t = t
+3. x.leaf = leaf
+4. x.keys = ALLOCATE-ARRAY(2 * t - 1)
+5. x.children = ALLOCATE-ARRAY(2 * t)
+6. x.n = 0
+7. x.next = NULL
+8. RETURN x
+
+*/
+
 // Function to create a new B+ tree node
 Node* createNode(int t, bool leaf)
 {
@@ -41,6 +55,17 @@ Node* createNode(int t, bool leaf)
     newNode->next = NULL;
     return newNode;
 }
+
+/* Pseudo code for create tree
+
+CREATE-BTREE(t)
+1. T = ALLOCATE-BTREE()
+2. T.t = t
+3. T.root = CREATE-NODE(t, TRUE)
+4. DISK-WRITE(T.root)
+5. RETURN T
+
+*/
 
 // Function to create a new B+ tree
 BTree* createBTree(int t)
@@ -68,6 +93,20 @@ void display(Node* node)
     }
 }
 
+/* Pseudocode for search
+
+SEARCH(node, key)
+1. i = 0
+2. WHILE i < node.n AND key > node.keys[i]
+3.    i = i + 1
+4. IF i < node.n AND key = node.keys[i]
+5.    RETURN TRUE
+6. IF node.leaf
+7.    RETURN FALSE
+8. RETURN SEARCH(node.children[i], key)
+
+*/
+
 // Function to search a key in the B+ tree
 bool search(Node* node, int key)
 {
@@ -83,6 +122,34 @@ bool search(Node* node, int key)
     }
     return search(node->children[i], key);
 }
+
+/* Pseudocode to splitchild 
+
+SPLIT-CHILD(parent, i, child)
+1. t = child.t
+2. newChild = CREATE-NODE(t, child.leaf)
+3. newChild.n = t - 1
+4. FOR j = 0 TO t - 2
+5.    newChild.keys[j] = child.keys[j + t]
+6.
+7. IF NOT child.leaf
+8.    FOR j = 0 TO t - 1
+9.        newChild.children[j] = child.children[j + t]
+10.
+11. child.n = t - 1
+12.
+13. FOR j = parent.n DOWNTO i + 1
+14.    parent.children[j + 1] = parent.children[j]
+15.
+16. parent.children[i + 1] = newChild
+17.
+18. FOR j = parent.n - 1 DOWNTO i
+19.    parent.keys[j + 1] = parent.keys[j]
+20.
+21. parent.keys[i] = child.keys[t - 1]
+22. parent.n = parent.n + 1
+
+*/
 
 // Function to split the child of a node during insertion
 void splitChild(Node* parent, int i, Node* child)
@@ -115,6 +182,30 @@ void splitChild(Node* parent, int i, Node* child)
     parent->n += 1;
 }
 
+
+/*Pseudocode for insertNonFull
+
+INSERT-NONFULL(node, key)
+1. i = node.n - 1
+2. IF node.leaf
+3.    WHILE i >= 0 AND node.keys[i] > key
+4.        node.keys[i + 1] = node.keys[i]
+5.        i = i - 1
+6.    node.keys[i + 1] = key
+7.    node.n = node.n + 1
+8. ELSE
+9.    WHILE i >= 0 AND node.keys[i] > key
+10.        i = i - 1
+11.    i = i + 1
+12.    IF node.children[i].n = 2 * node.t - 1
+13.        SPLIT-CHILD(node, i, node.children[i])
+14.        IF node.keys[i] < key
+15.            i = i + 1
+16.    INSERT-NONFULL(node.children[i], key)
+
+
+*/
+
 // Function to insert a non-full node
 void insertNonFull(Node* node, int key)
 {
@@ -143,6 +234,22 @@ void insertNonFull(Node* node, int key)
     }
 }
 
+/* Pseudo code for insert
+
+INSERT(btree, key)
+1. root = btree.root
+2.
+3. IF root.n = 2 * btree.t - 1
+4.    newRoot = CREATE-NODE(btree.t, FALSE)
+5.    newRoot.children[0] = root
+6.    SPLIT-CHILD(newRoot, 0, root)
+7.    INSERT-NON-FULL(newRoot, key)
+8.    btree.root = newRoot
+9. ELSE
+10.   INSERT-NON-FULL(root, key)
+
+*/
+
 // Function to insert a key into the B+ tree
 void insert(BTree* btree, int key)
 {
@@ -169,6 +276,18 @@ void borrowFromPrev(Node* node, int idx);
 void borrowFromNext(Node* node, int idx);
 void merge(Node* node, int idx);
 
+
+/* Pseudo code for delete
+
+DELETE-KEY(btree, key)
+1. root = btree.root
+2. DELETE-KEY-HELPER(root, key)
+3. IF root.n = 0 AND NOT root.leaf
+4.    btree.root = root.children[0]
+5.    FREE(root)
+
+*/
+
 // Function for deleting a key from the B+ tree
 void deleteKey(BTree* btree, int key)
 {
@@ -184,6 +303,31 @@ void deleteKey(BTree* btree, int key)
         free(root);
     }
 }
+
+
+/* Pseudo code for delete helper
+
+DELETE-KEY-HELPER(node, key)
+1. i = 0
+2. WHILE i < node.n AND key > node.keys[i]
+3.    2.1 i = i + 1
+4.
+5. IF i < node.n AND key = node.keys[i]
+6.    IF node.leaf
+7.        FOR j = i TO node.n - 2
+8.            node.keys[j] = node.keys[j + 1]
+9.        node.n = node.n - 1
+10.   ELSE
+11.        IF node.children[i].n >= node.t
+12.            DELETE-KEY-HELPER(node.children[i], key)
+13.        ELSE
+14.            IF i < node.n AND node.children[i + 1].n >= node.t
+15.                DELETE-KEY-HELPER(node.children[i + 1], key)
+16.            ELSE
+17.                MERGE(node, i)
+18.                DELETE-KEY-HELPER(node.children[i], key)
+
+*/
 
 // Helper function to recursively delete a key from the B+ tree
 void deleteKeyHelper(Node* node, int key)
@@ -368,6 +512,31 @@ void borrowFromNext(Node* node, int idx)
     sibling->n -= 1;
 }
 
+
+/* Pseudo code for merge
+
+MERGE(parent, i)
+1. t = parent.t
+2. child = parent.children[i]
+3. sibling = parent.children[i + 1]
+4. child.keys[t - 1] = parent.keys[i]
+5. FOR j = 0 TO sibling.n - 1
+6.    child.keys[j + t] = sibling.keys[j]
+7. IF NOT child.leaf
+8.    FOR j = 0 TO sibling.n
+9.        child.children[j + t] = sibling.children[j]
+10.
+11. FOR j = i + 1 TO parent.n - 1
+12.    parent.keys[j - 1] = parent.keys[j]
+13.    parent.children[j] = parent.children[j + 1]
+14.
+15. parent.n = parent.n - 1
+16. child.n = child.n + sibling.n + 1
+17.
+18. FREE(sibling)
+
+*/
+
 // Function to merge idx-th child of node with (idx + 1)-th
 // child of node
 void merge(Node* node, int idx)
@@ -421,6 +590,23 @@ void merge(Node* node, int idx)
     free(sibling);
 }
 
+/* Pseudocode for printTree
+
+PRINTTREE(node, level)
+1. IF node = NULL
+2.    RETURN
+3. FOR i = 0 TO level - 1
+4.    PRINT "  "
+5. PRINT "["
+6. FOR i = 0 TO node.n - 1
+7.    PRINT node.keys[i] + " "
+8. PRINT "]"
+9. PRINT newline
+10. IF NOT node.leaf
+11.    FOR i = 0 TO node.n
+12.        PRINTTREE(node.children[i], level + 1)
+
+*/
 
 // Function to visualize the B+ tree structure
 void printTree(Node* node, int level) {
